@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <ctype.h>
 
+//Agustín Ezequiel Quiroga, SSL 2022
+
 void imprimirChar(char x);
 
 int main(int argc, char* argv[]) {
