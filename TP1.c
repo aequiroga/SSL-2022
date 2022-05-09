@@ -1,31 +1,40 @@
 #include <stdio.h>
 #include <ctype.h>
 
-//Agustín Ezequiel Quiroga, SSL 2022
-
 void imprimirChar(char x);
 
 int main(int argc, char* argv[]) {
     
     char x = 0;
-    //Si no hay argv, leo de consola
+    //Si no hay argv, leo de consola y guardo en archivo
     if(argc<2) {
-        printf("Terminar ejecucion con Ctrl+C\n");
-        while(1) {
-            if(x)imprimirChar(x);
+        FILE* file = fopen("output.txt","w");
+        printf("Terminar ejecucion escribiendo un espacio\n");
+
+        while(x!=' ') {
+            if(x) imprimirChar(x);
             x = getchar();
+            fwrite(&x,sizeof(char),1,file);
         }
+
+        fclose(file);
     }
 
-    //Si hay argv, leo del archivo
+    //Si hay argv, leo del archivo e imprimo en consola
     else {
         FILE* file = fopen(argv[1],"r");
-
-        if(file==NULL) printf("No se encontro el archivo");
-        else while(!feof(file)) {
-            if(x)imprimirChar(x);
-            fread(&x,sizeof(char),1,file);
+        FILE* file2 = fopen("output.txt","w");
+        if (file==NULL) printf("No se encontro el archivo");
+        else {
+                printf("\nLeyendo del archivo %s \n\n", argv[1]);
+                while(!feof(file)) {
+                    if(x)imprimirChar(x);
+                    fread(&x,sizeof(char),1,file);
+                    fwrite(&x,sizeof(char),1,file2);
+                }              
         }
+        fclose(file);
+        fclose(file2);
     }
 
     return 0;
