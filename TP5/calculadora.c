@@ -44,7 +44,7 @@ int procesarAsignacion(char *nombreEntrada, double valorParaAsignar, tipoOperaci
 
    if (ultimoIndiceBuscado >= 0)
    {
-      if (tipoEntradaCorrecto(tipoDeEntrada, VAR) == 0)
+      if (tipoEntradaCorrecto(tipoDeEntrada, VARIABLE) == 0)
       {
          if (asignar(ultimoIndiceBuscado, tipoOperacion, valorParaAsignar) == 0)
             return 0;
@@ -145,7 +145,7 @@ void mensajeError(tipoError tipoError, char *nombreEntrada)
       break;
    case ASIGNACIONNOVAR:
       tipoEntrada tipoDeEntrada = diccionario[ultimoIndiceBuscado].tipo;
-      if (tipoDeEntrada == CTE)
+      if (tipoDeEntrada == CONSTANTE)
          sprintf(mensajeError, "Los operadores de asignación solo admiten una variable como operando izquierdo. La entrada %s es de tipo constante");
       else
          sprintf(mensajeError, "Los operadores de asignación solo admiten una variable como operando izquierdo. La entrada %s es una funcion");
@@ -232,12 +232,12 @@ void inicializarTabla()
       mensajeError(DICCIONARIOSINESPACIO, "");
       break;
    case 1:
-      agregarEntradaDiccionario("pi", CTE, 3.141592654);
+      agregarEntradaDiccionario("pi", CONSTANTE, 3.141592654);
       mensajeError(DICCIONARIOSINESPACIO, "");
       break;
    default:
-      agregarEntradaDiccionario("pi", CTE, 3.141592654);
-      agregarEntradaDiccionario("e", CTE, 2.718281828);
+      agregarEntradaDiccionario("pi", CONSTANTE, 3.141592654);
+      agregarEntradaDiccionario("e", CONSTANTE, 2.718281828);
       break;
    }
 }

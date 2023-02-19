@@ -1,25 +1,7 @@
-struct funciones
-{
-    char *nombre;
-    int tipo;
-    double (*funcion)(double);
-};
-
-struct symrec
-{
-    char *nombre;     // guardo una cadena
-    tipoEntrada tipo; // tipo 1-VAR 2-CTE 3-FUNCION
-    union
-    {
-        double nro;
-        double (*funcion)(double); // puntero a funcion que recibe 1 parametro tipo double y devuelve un double
-    } valor;
-};
-
 enum tipoEntrada
 {
-    VAR = 1,
-    CTE,
+    VARIABLE = 1,
+    CONSTANTE,
     FUNCION
 };
 enum tipoOperacionAsignacion
@@ -46,6 +28,24 @@ typedef struct symrec symrec;
 typedef enum tipoEntrada tipoEntrada;
 typedef enum tipoOperacionAsignacion tipoOperacionAsignacion;
 typedef enum tipoError tipoError;
+
+struct funciones
+{
+    char *nombre;
+    int tipo;
+    double (*funcion)(double);
+};
+
+struct symrec
+{
+    char *nombre;
+    tipoEntrada tipo;
+    union
+    {
+        double nro;
+        double (*funcion)(double);
+    } valor;
+};
 
 int declarar(tipoEntrada, char *, double);                       // DONE
 int procesarAsignacion(char *, double, tipoOperacionAsignacion);  // DONE

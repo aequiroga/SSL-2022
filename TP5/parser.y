@@ -15,8 +15,6 @@
    char *pala1;
 }
 
-%define api.value.type{char *}
-
 %defines "parser.h"					
 %output "parser.c"
 
