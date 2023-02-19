@@ -21,6 +21,7 @@ struct funciones arrayFunciones[8] =
 
 symrec diccionario[TAMANODICCIONARIO]; // Diccionario
 int posicionDiccionario = 0;           // Indice para agregar elementos a diccionario
+int ultimoIndiceBuscado = -1;          // Variable a forma de cache, se le asigna -1 para indicar que no posee registro
 
 void agregarEntradaDiccionario(char *nombre, tipoEntrada tipoEntrada, double valorEntrada)
 {
@@ -36,59 +37,90 @@ int tipoEntradaCorrecto(tipoEntrada tipoDeEntrada, tipoEntrada tipoDeEntradaDese
 }
 
 // Valido tipos y existencia de entrada, y llamo a la asignacion. Si falla no asigna.
-void procesarAsignacion(char *nombreEntrada, double valorParaAsignar, tipoOperacionAsignacion tipoOperacion)
+int procesarAsignacion(char *nombreEntrada, double valorParaAsignar, tipoOperacionAsignacion tipoOperacion)
 {
-   int posicionDiccionario = buscarEntradaDiccionario(nombreEntrada);
+   ultimoIndiceBuscado = buscarEntradaDiccionario(nombreEntrada);
    tipoEntrada tipoDeEntrada = diccionario[posicionDiccionario].tipo;
-   if (posicionDiccionario >= 0)
+
+   if (ultimoIndiceBuscado >= 0)
    {
       if (tipoEntradaCorrecto(tipoDeEntrada, VAR) == 0)
-         asignar(nombreEntrada, tipoOperacion, valorParaAsignar, posicionDiccionario);
-      else
-         mensajeError(ASIGNACIONNOVAR, "");
+      {
+         if (asignar(ultimoIndiceBuscado, tipoOperacion, valorParaAsignar) == 0)
+            return 0;
+         return -1;
+      }
+      mensajeError(ASIGNACIONNOVAR, "");
    }
    else
       mensajeError(NODECLARADO, nombreEntrada);
+   return -1;
 }
 
-// Valido tipos y existencia de entrada, y devuelvo el resultado de aplicar la funcion al valor
-double procesarFuncion(char *nombreFuncion, double valorParaFuncion)
+// Validaciones de tipo y existencia de funcion, en caso de error devuelve -1
+int existeFuncion(char *nombreFuncion)
 {
-   int posicionDiccionario = buscarEntradaDiccionario(nombreFuncion);
+   ultimoIndiceBuscado = buscarEntradaDiccionario(nombreFuncion);
    tipoEntrada tipoDeEntrada = diccionario[posicionDiccionario].tipo;
-   if (posicionDiccionario >= 0)
+   if (ultimoIndiceBuscado >= 0)
    {
       if (tipoEntradaCorrecto(tipoDeEntrada, FUNCION) == 0)
-         return diccionario[posicionDiccionario].valor.funcion(diccionario[posicionDiccionario].valor.nro);
-      else
-         mensajeError(NOESFUNCION, nombreFuncion);
+      {
+         return 0;
+      }
+      mensajeError(NOESFUNCION, nombreFuncion);
    }
+   return -1;
 }
 
-void mostrarValorIdentificador(char *nombreEntrada)
+// Devuelvo el resultado de aplicar la funcion al valor
+double procesarFuncion()
+{
+   return ultimoIndiceBuscado > -1 ? diccionario[ultimoIndiceBuscado].valor.funcion(diccionario[ultimoIndiceBuscado].valor.nro) : -1;
+}
+
+// Valida que un identificador sea de tipo VAR/CTE y que exista
+int validarIdentificador(char *nombreEntrada)
 {
    int posicionDiccionario = buscarEntradaDiccionario(nombreEntrada);
    tipoEntrada tipoDeEntrada = diccionario[posicionDiccionario].tipo;
-   if (posicionDiccionario >= 0)
-   {
-      if (tipoEntradaCorrecto(tipoDeEntrada, FUNCION) != 0) // Invierto la logica para validar que no sea funcion
-         return diccionario[posicionDiccionario].valor.nro;
-      else
-      {
-         mensajeError(ESFUNCION, nombreEntrada);
-      }
-   }
-}
 
-void declarar(tipoEntrada tipoDeEntrada, char *nombreEntrada, double valorParaAsignar)
-{
-   int posicionDiccionario = buscarEntradaDiccionario(nombreEntrada);
-   if (posicionDiccionario == -1) // Validar que no existe la entrada
+   // Si la entrada es valida guardo posicion en cache, sino -1
+   if (posicionDiccionario > 0)
    {
-      agregarEntradaDiccionario(nombreEntrada, tipoDeEntrada, valorParaAsignar);
+      if (tipoDeEntrada != FUNCION)
+      {
+         ultimoIndiceBuscado = posicionDiccionario;
+         return 0;
+      }
+      mensajeError(ESFUNCION, nombreEntrada);
    }
    else
+      mensajeError(NODECLARADO, nombreEntrada);
+   return -1;
+}
+
+// Muestra el valor de una VAR/CTE
+double mostrarValorIdentificador()
+{
+   return diccionario[ultimoIndiceBuscado].valor.nro;
+}
+
+int declarar(tipoEntrada tipoDeEntrada, char *nombreEntrada, double valorParaAsignar)
+{
+   if (posicionDiccionario != TAMANODICCIONARIO - 1)
+   {
+      ultimoIndiceBuscado = buscarEntradaDiccionario(nombreEntrada);
+      if (ultimoIndiceBuscado == -1) // Validar que no existe la entrada
+      {
+         agregarEntradaDiccionario(nombreEntrada, tipoDeEntrada, valorParaAsignar);
+         return 0;
+      }
       mensajeError(YADECLARADO, nombreEntrada);
+   }
+   else
+      mensajeError(DICCIONARIOSINESPACIO, "");
+   return -1;
 }
 
 // Busco entrada en diccionario y asigno posicion a variable, si no la encuentra devuelve -1
@@ -112,7 +144,11 @@ void mensajeError(tipoError tipoError, char *nombreEntrada)
       yyerror(mensajeError);
       break;
    case ASIGNACIONNOVAR:
-      sprintf(mensajeError, "Los operadores de asignación solo admiten una variable como operando izquierdo.");
+      tipoEntrada tipoDeEntrada = diccionario[ultimoIndiceBuscado].tipo;
+      if (tipoDeEntrada == CTE)
+         sprintf(mensajeError, "Los operadores de asignación solo admiten una variable como operando izquierdo. La entrada %s es de tipo constante");
+      else
+         sprintf(mensajeError, "Los operadores de asignación solo admiten una variable como operando izquierdo. La entrada %s es una funcion");
       yyerror(mensajeError);
       break;
    case DICCIONARIOSINESPACIO:
@@ -131,6 +167,11 @@ void mensajeError(tipoError tipoError, char *nombreEntrada)
       sprintf(mensajeError, "La entrada %s ya fue declarada en el diccionario.", nombreEntrada);
       yyerror(mensajeError);
       break;
+   case ASIGNACIONDIVISIONPORCERO:
+   case DIVISIONPORCERO:
+      sprintf(mensajeError, "No es posible dividir por cero");
+      yyerror(mensajeError);
+      break;
    default:
       sprintf(mensajeError, "Error desconocido.", nombreEntrada);
       yyerror(mensajeError);
@@ -138,6 +179,7 @@ void mensajeError(tipoError tipoError, char *nombreEntrada)
    }
 }
 
+// Asigna un valor a una entrada de diccionario, en caso de error devuelve -1
 double asignar(int posicionEntradaDiccionario, tipoOperacionAsignacion tipoOperacionAsignacion, double valorParaAsignar)
 {
    switch (tipoOperacionAsignacion)
@@ -155,13 +197,16 @@ double asignar(int posicionEntradaDiccionario, tipoOperacionAsignacion tipoOpera
       diccionario[posicionEntradaDiccionario].valor.nro *= valorParaAsignar;
       break;
    case ASIGNACIONCONDIVISION:
-      if (valorParaAsignar > 0)
-      {
+      if (valorParaAsignar != 0)
          diccionario[posicionEntradaDiccionario].valor.nro /= valorParaAsignar;
+      else
+      {
+         mensajeError(ASIGNACIONDIVISIONPORCERO, "");
+         return -1;
       }
       break;
    }
-   return diccionario[posicionEntradaDiccionario].valor.nro;
+   return 0;
 }
 
 // Inserto funciones y constantes iniciales en el diccionario
@@ -170,7 +215,7 @@ void inicializarTabla()
    // Se agregan validaciones de espacio para el caso hipotetico que el diccionario no posea suficiente espacio para las entradas iniciales
    for (int i = 0; i < 8; i++)
    {
-      if (posicionDiccionario != TAMANODICCIONARIO)
+      if (posicionDiccionario != TAMANODICCIONARIO - 1)
       {
          diccionario[i].nombre = arrayFunciones[i].nombre;
          diccionario[i].tipo = arrayFunciones[i].tipo;
@@ -181,7 +226,7 @@ void inicializarTabla()
          mensajeError(DICCIONARIOSINESPACIO, "");
    }
 
-   switch (TAMANODICCIONARIO - posicionDiccionario)
+   switch (TAMANODICCIONARIO - posicionDiccionario - 1)
    {
    case 0:
       mensajeError(DICCIONARIOSINESPACIO, "");

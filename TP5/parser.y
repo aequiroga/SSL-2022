@@ -50,26 +50,26 @@ linea :                            expresion '\n'                       {printf(
                                |   '\n'                          
                                ; 
 
-expresion :                        IDENTIFICADOR '=' expresion          {procesarAsignacion($1,$3,ASIGNACION)}
-                               |   IDENTIFICADOR "+=" expresion         {procesarAsignacion($1,$3,ASIGNACIONCONSUMA)}
-                               |   IDENTIFICADOR "-=" expresion         {procesarAsignacion($1,$3,ASIGNACIONCONRESTA)}
-                               |   IDENTIFICADOR "*=" expresion         {procesarAsignacion($1,$3,ASIGNACIONCONMULTIPLICACION)}
-                               |   IDENTIFICADOR "/=" expresion         {procesarAsignacion($1,$3,ASIGNACIONCONDIVISION)}                   
+expresion :                        IDENTIFICADOR '=' expresion          {if(procesarAsignacion($1,$3,ASIGNACION)==0){$$ = mostrarValorIdentificador();} else YYERROR;}
+                               |   IDENTIFICADOR "+=" expresion         {if(procesarAsignacion($1,$3,ASIGNACIONCONSUMA)==0){$$ = mostrarValorIdentificador();} else YYERROR;}
+                               |   IDENTIFICADOR "-=" expresion         {if(procesarAsignacion($1,$3,ASIGNACIONCONRESTA)==0){$$ = mostrarValorIdentificador();} else YYERROR;}
+                               |   IDENTIFICADOR "*=" expresion         {if(procesarAsignacion($1,$3,ASIGNACIONCONMULTIPLICACION)==0){$$ = mostrarValorIdentificador();} else YYERROR;}
+                               |   IDENTIFICADOR "/=" expresion         {if(procesarAsignacion($1,$3,ASIGNACIONCONDIVISION)==0){$$ = mostrarValorIdentificador();} else YYERROR;}
                                |   expresion '+' expresion              {$$ = $1 + $3;}                  
                                |   expresion '-' expresion              {$$ = $1 - $3;}
                                |   expresion '*' expresion              {$$ = $1 * $3;}
-                               |   expresion '/' expresion              {$$ = $1 / $3;}
+                               |   expresion '/' expresion              {if($3!=0) $$ = $1 / $3; else{mensajeError(DIVISIONPORCERO,"");YYERROR;}}
                                |   '-' expresion %prec NEG              {$$ = -$2;}
                                |   expresion '^' expresion              {$$ = pow($1,$3);}                    
                                |   '('expresion')'                      {$$ = $2;}
-                               |   IDENTIFICADOR'('expresion')'         {procesarFuncion($1,$3);}
-                               |   IDENTIFICADOR                        {mostrarValorIdentificador($1);}
-                               |   NRO                                  {printf($1);}    
+                               |   IDENTIFICADOR'('expresion')'         {if(existeFuncion($1)==0){$$ = procesarFuncion()} else YYERROR;}
+                               |   IDENTIFICADOR                        {if(validarIdentificador($1)==0) $$ = mostrarValorIdentificador($1); else YYERROR;}
+                               |   NRO
                                ;
                                  
-declaracion :                      VAR IDENTIFICADOR                    {declarar(VAR,$2,0);}
-                               |   VAR IDENTIFICADOR '=' expresion      {declarar(VAR,$2,$4);}
-                               |   CTE IDENTIFICADOR '=' expresion      {declarar(CTE,$2,$4);}
+declaracion :                      VAR IDENTIFICADOR                    {if(declarar(VAR,$2,0)!=0)  YYERROR;}
+                               |   VAR IDENTIFICADOR '=' expresion      {if(declarar(VAR,$2,$4)!=0) YYERROR;}
+                               |   CTE IDENTIFICADOR '=' expresion      {if(declarar(CTE,$2,$4)!=0) YYERROR;}
                                ;
 %%
 

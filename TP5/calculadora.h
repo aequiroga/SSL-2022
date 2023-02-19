@@ -37,7 +37,9 @@ enum tipoError
     DICCIONARIOSINESPACIO,
     NOESFUNCION,
     ESFUNCION,
-    YADECLARADO
+    YADECLARADO,
+    ASIGNACIONDIVISIONPORCERO,
+    DIVISIONPORCERO
 };
 
 typedef struct symrec symrec;
@@ -45,12 +47,13 @@ typedef enum tipoEntrada tipoEntrada;
 typedef enum tipoOperacionAsignacion tipoOperacionAsignacion;
 typedef enum tipoError tipoError;
 
-void declarar(tipoEntrada, char *, double);                       // DONE
-void procesarAsignacion(char *, double, tipoOperacionAsignacion); // DONE
-double procesarFuncion(char *, double);                           // DONE
-void mostrarValorIdentificador(char *);                           // DONE
+int declarar(tipoEntrada, char *, double);                       // DONE
+int procesarAsignacion(char *, double, tipoOperacionAsignacion);  // DONE
+int existeFuncion(char *nombreFuncion);
+int validarIdentificador(char* nombreEntrada);
+double procesarFuncion();                                         // DONE
+double mostrarValorIdentificador();                            // DONE
 void agregarEntradaDiccionario(char *, enum tipoEntrada, double); // DONE
-double asignar(int, enum tipoOperacionAsignacion, double);     // DONE
+double asignar(int, enum tipoOperacionAsignacion, double);        // DONE
 int buscarEntradaDiccionario(char *);                             // DONE
-tipoEntrada tipoIdentificador(char *);                            //???
 void inicializarTabla();                                          // DONE
