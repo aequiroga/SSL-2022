@@ -9,14 +9,14 @@
 
 struct funciones arrayFunciones[8] =
     {
-        {"sin", 3, sin},
-        {"cos", 3, cos},
-        {"tan", 3, tan},
-        {"asin", 3, asin},
-        {"acos", 3, acos},
-        {"atan", 3, atan},
-        {"sqrt", 3, sqrt},
-        {"log", 3, log},
+        {"sin", FUNCION, sin},
+        {"cos", FUNCION, cos},
+        {"tan", FUNCION, tan},
+        {"asin", FUNCION, asin},
+        {"acos", FUNCION, acos},
+        {"atan", FUNCION, atan},
+        {"sqrt", FUNCION, sqrt},
+        {"log", FUNCION, log},
 };
 
 symrec diccionario[TAMANODICCIONARIO]; // Diccionario
