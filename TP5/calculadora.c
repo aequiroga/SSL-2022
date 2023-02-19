@@ -83,7 +83,7 @@ void mostrarValorIdentificador(char *nombreEntrada)
 void declarar(tipoEntrada tipoDeEntrada, char *nombreEntrada, double valorParaAsignar)
 {
    int posicionDiccionario = buscarEntradaDiccionario(nombreEntrada);
-   if (posicionDiccionario == -1) //Validar que no existe la entrada
+   if (posicionDiccionario == -1) // Validar que no existe la entrada
    {
       agregarEntradaDiccionario(nombreEntrada, tipoDeEntrada, valorParaAsignar);
    }
@@ -132,7 +132,7 @@ void mensajeError(tipoError tipoError, char *nombreEntrada)
       yyerror(mensajeError);
       break;
    default:
-      sprintf(mensajeError,"Error desconocido.", nombreEntrada);
+      sprintf(mensajeError, "Error desconocido.", nombreEntrada);
       yyerror(mensajeError);
       break;
    }
@@ -140,28 +140,28 @@ void mensajeError(tipoError tipoError, char *nombreEntrada)
 
 double asignar(int posicionEntradaDiccionario, tipoOperacionAsignacion tipoOperacionAsignacion, double valorParaAsignar)
 {
-      switch (tipoOperacionAsignacion)
+   switch (tipoOperacionAsignacion)
+   {
+   case ASIGNACION:
+      diccionario[posicionEntradaDiccionario].valor.nro = valorParaAsignar;
+      break;
+   case ASIGNACIONCONSUMA:
+      diccionario[posicionEntradaDiccionario].valor.nro += valorParaAsignar;
+      break;
+   case ASIGNACIONCONRESTA:
+      diccionario[posicionEntradaDiccionario].valor.nro -= valorParaAsignar;
+      break;
+   case ASIGNACIONCONMULTIPLICACION:
+      diccionario[posicionEntradaDiccionario].valor.nro *= valorParaAsignar;
+      break;
+   case ASIGNACIONCONDIVISION:
+      if (valorParaAsignar > 0)
       {
-      case ASIGNACION:
-         diccionario[posicionEntradaDiccionario].valor.nro = valorParaAsignar;
-         break;
-      case ASIGNACIONCONSUMA:
-         diccionario[posicionEntradaDiccionario].valor.nro += valorParaAsignar;
-         break;
-      case ASIGNACIONCONRESTA:
-         diccionario[posicionEntradaDiccionario].valor.nro -= valorParaAsignar;
-         break;
-      case ASIGNACIONCONMULTIPLICACION:
-         diccionario[posicionEntradaDiccionario].valor.nro *= valorParaAsignar;
-         break;
-      case ASIGNACIONCONDIVISION:
-         if (valorParaAsignar > 0)
-         {
-            diccionario[posicionEntradaDiccionario].valor.nro /= valorParaAsignar;
-         }
-         break;
+         diccionario[posicionEntradaDiccionario].valor.nro /= valorParaAsignar;
       }
-      return diccionario[posicionEntradaDiccionario].valor.nro;
+      break;
+   }
+   return diccionario[posicionEntradaDiccionario].valor.nro;
 }
 
 // Inserto funciones y constantes iniciales en el diccionario
@@ -180,14 +180,19 @@ void inicializarTabla()
       else
          mensajeError(DICCIONARIOSINESPACIO, "");
    }
-   if ((TAMANODICCIONARIO - posicionDiccionario) >= 2)
+
+   switch (TAMANODICCIONARIO - posicionDiccionario)
    {
-      agregarEntradaDiccionario("pi", CTE, 3.141592654);
-      agregarEntradaDiccionario("e", CTE, 2.718281828);
-   }
-   else
-   {
+   case 0:
+      mensajeError(DICCIONARIOSINESPACIO, "");
+      break;
+   case 1:
       agregarEntradaDiccionario("pi", CTE, 3.141592654);
       mensajeError(DICCIONARIOSINESPACIO, "");
+      break;
+   default:
+      agregarEntradaDiccionario("pi", CTE, 3.141592654);
+      agregarEntradaDiccionario("e", CTE, 2.718281828);
+      break;
    }
 }
