@@ -67,10 +67,14 @@ expresion :                        IDENTIFICADOR '=' expresion          {if(proc
                                |   IDENTIFICADOR                        {if(existeVarCte($1)==1) $$ = mostrarValorIdentificador($1);else YYERROR;}
                                |   NRO 
                                ;                                                        
-declaracion :                      VAR IDENTIFICADOR                    {if(declarar($2,1,0)!=0)YYERROR;}
-                               |   VAR IDENTIFICADOR '=' expresion      {if(declarar($2,1,$4)!=0)YYERROR;}
-                               |   CTE IDENTIFICADOR '=' expresion      {if(declarar($2,2,$4)!=0)YYERROR;}
-                               |   CTE IDENTIFICADOR                    {mensajeDeError(DECLARACTESINVALOR,$2);YYERROR;}
+declaracion :                      VAR IDENTIFICADOR                     {if(declarar($2,1,0)!=0)YYERROR;}
+                               |   VAR IDENTIFICADOR '=' expresion       {if(declarar($2,1,$4)!=0)YYERROR;}
+                               |   VAR IDENTIFICADOR "+=" expresion      {yyerror("No se puede declarar usando +=");YYERROR;}
+                               |   VAR IDENTIFICADOR "-=" expresion      {yyerror("No se puede declarar usando -=");YYERROR;}
+                               |   VAR IDENTIFICADOR "*=" expresion      {yyerror("No se puede declarar usando *=");YYERROR;}
+                               |   VAR IDENTIFICADOR "/=" expresion      {yyerror("No se puede declarar usando /=");YYERROR;}
+                               |   CTE IDENTIFICADOR '=' expresion       {if(declarar($2,2,$4)!=0)YYERROR;}
+                               |   CTE IDENTIFICADOR                     {mensajeDeError(DECLARACTESINVALOR,$2);YYERROR;}
                                ;
 %%
 
