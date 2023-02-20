@@ -17,7 +17,6 @@ digito         [0-9]
 expo           [eE][+-]?{digito}+
 fracc          {digito}*\.{digito}+|{digito}+\.{digito}*
 letra_Digito   [a-zA-Z0-9]
-opera_Asig     [+\-*/][=]
 entero         {digito}+
 real           {fracc}+{expo}?|{digito}+{expo}
 numeros        {entero}|{real}
@@ -25,11 +24,12 @@ otros          [[:punct:]]{-}[+\-*/=^()]
 espacios       [[:space:]]{-}[\n]
 
 %%
+"diccionario"                                               return VERDICCIONARIO;
 var                                                         return VAR;
 cte                                                         return CTE;
 salir                                                       return SALIR;
-{letra}{letra_Digito}*                                      return IDENTIFICADOR;                                                           
-{numeros}                                                   return NRO;  
+{letra}{letra_Digito}*                                      {yylval.texto = strdup(yytext);return IDENTIFICADOR;}                                                           
+{numeros}                                                   {sscanf(yytext,"%lf",&yylval.num);return NRO;}  
 "+="                                                        return MASIGUAL;
 "-="                                                        return MENOSIGUAL;
 "*="                                                        return PRODUCTOIGUAL;
