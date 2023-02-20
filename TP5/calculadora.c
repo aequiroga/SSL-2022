@@ -148,9 +148,12 @@ int buscarEntradaDiccionario(char *nombreEntrada)
 {
     for (int i = 0; i < posicionDiccionario; i++)
     {
-        if (strcmp(diccionario[i].nombre, nombreEntrada) == 0)
+        if(diccionario[i].nombre!=NULL)
         {
-            return i;
+            if (strcmp(diccionario[i].nombre, nombreEntrada) == 0)
+            {
+                return i;
+            }
         }
     }
     return -1;
@@ -233,7 +236,7 @@ int procesarAsignacion(char *nombreEntrada, double valorParaAsignar, int tipoOpe
             return -1;
         }
 
-        mensajeDeError(ASIGNACIONNOVAR, NULL);
+        mensajeDeError(ASIGNACIONNOVAR, nombreEntrada);
     }
 
     else
